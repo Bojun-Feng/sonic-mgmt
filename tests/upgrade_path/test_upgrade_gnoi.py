@@ -22,6 +22,10 @@ def gnoi_upgrade_path_lists(request):
     from_image = request.config.getoption("base_image_list")
     to_image = request.config.getoption("target_image_list")
     to_version = request.config.getoption("target_version")
+    assert to_version, (
+        "--target_version is required for gNOI upgrade tests "
+        "(e.g. --target_version SONiC-OS-20251110.06)"
+    )
 
     dut_image_path = "/var/tmp/sonic_image"
 

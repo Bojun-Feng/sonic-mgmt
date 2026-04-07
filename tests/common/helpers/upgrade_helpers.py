@@ -29,9 +29,9 @@ class GnoiUpgradeConfig:
     to_image: str
     dut_image_path: str
     upgrade_type: str
+    to_version: str  # Expected version string for SetPackage and post-upgrade validation
     protocol: str = "HTTP"
     allow_fail: bool = False
-    to_version: Optional[str] = None  # Optional expected version string to validate after upgrade
 
 
 def pytest_runtest_setup(item):
@@ -351,6 +351,8 @@ def perform_gnoi_upgrade(
     pytest_assert(res.get("rc", 1) == 0, f"Downloaded file not found or empty on DUT: {cfg.dut_image_path}")
 
     # ---- 3) SetPackage (via wrapper) ----
+    pytest_assert(cfg.to_version, "cfg.to_version is required for SetPackage and post-upgrade validation")
+
     setpkg_resp = ptf_gnoi.system_set_package(
         local_path=cfg.dut_image_path,
         version=cfg.to_version,
@@ -358,8 +360,6 @@ def perform_gnoi_upgrade(
     )
     logger.info("SetPackage response: %s", setpkg_resp)
     pytest_assert(isinstance(setpkg_resp, dict), "SetPackage did not return a JSON object")
-
-    pytest_assert(cfg.to_version, "cfg.to_version must be provided for validation")
     # ---- 4) Reboot (via wrapper) ----
     try:
         reboot_resp = ptf_gnoi.system_reboot(method=str(cfg.upgrade_type).upper())
@@ -386,7 +386,7 @@ def perform_gnoi_upgrade(
     check_neighbors(duthost, tbinfo)
     check_copp_config(duthost)
 
-    # ---- 7) Version validation) ----
+    # ---- 7) Version validation ----
     images = _get_images_from_sonic_installer_list(duthost)
     logger.info("sonic-installer list parsed: %s", images)
     pytest_assert(
