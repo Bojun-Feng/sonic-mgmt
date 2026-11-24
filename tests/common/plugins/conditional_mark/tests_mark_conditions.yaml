@@ -6131,6 +6131,14 @@ vrf/test_vrf_attr.py::TestVrfAttrSrcMac::test_vrf1_neigh_with_default_router_mac
     conditions:
       - "asic_type in ['barefoot', 'vs']"
 
+vrf/test_vrf_del_port_reuse_route_rif_consistency.py:
+  skip:
+    reason: "Single-ASIC KVM t0 only (loads 20,000 routes)"
+    conditions_logical_operator: or
+    conditions:
+      - "asic_type not in ['vs']"
+      - "is_multi_asic==True"
+
 #######################################
 #####           vxlan            #####
 #######################################
